@@ -4,16 +4,44 @@
 // Author: Hongyi Wu(吴鸿毅)
 // Email: wuhongyi@qq.com 
 // Created: 日 11月 13 13:26:31 2016 (+0800)
-// Last-Updated: 日 11月 13 20:57:26 2016 (+0800)
+// Last-Updated: 一 11月 14 17:55:12 2016 (+0800)
 //           By: Hongyi Wu(吴鸿毅)
-//     Update #: 29
+//     Update #: 72
 // URL: http://wuhongyi.cn 
 
 #include "TGFrame.h"
 
 #include <iostream>
+#include <unistd.h>
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+// Connect
+
+// TCanvas ProcessedEvent(Int_t,Int_t,Int_t,TObject*)
+// TGCheckButton Toggled(Bool_t)
+// TGColorSelect ColorSelected(Pixel_t)
+// TGComboBox Selected(Int_t)
+// TGCompositeFrame ProcessedEvent(Event_t*) ProcessedConfigure(Event_t*)
+// TGFrame ProcessedEvent(Event_t*) ProcessedConfigure(Event_t*)
+// TGMainFrame CloseWindow()
+// TGNumberEntry TextChanged(char*)
+// TGPopupMenu Activated(Int_t)
+// TGSpeedo OdoClicked() LedClicked()
+// TGTextButton Clicked() Pressed() 
+
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+class IDList {
+
+private:
+   Int_t nID;   // creates unique widget's IDs
+
+public:
+   IDList() : nID(0) {}
+   ~IDList() {}
+   Int_t GetUnID(void) { return ++nID; }
+};
 
 class MainFrame : public TGMainFrame
 {
@@ -22,14 +50,29 @@ public:
   virtual ~MainFrame();
 
   
-  virtual Bool_t ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2);//process message queue
+  virtual Bool_t ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2);//process message queue  一次仅允许一个操作在响应，做个操作将按照先后顺序依次响应
 
   void ChangeStartLabel();
-
+  void SetGroupEnabled(Bool_t);
+  void ChangeUpdate();
   
 private:
+  TGLabel       *fLbl1, *fLbl2, *fLbl3, *fLbl4;
+  
   TGTextButton     *fStart, *fPause, *fExit;
-  Bool_t            start, pause;
+  Bool_t           start, pause;
+  
+  TGButtonGroup      *fButtonGroup;  // Button group
+  TGCheckButton       *fCheckb[4];    // Check buttons
+  TGRadioButton       *fRadiob[2];    // Radio buttons
+
+  TGComboBox     *fMonthBox;   // month selector
+  TGNumberEntry  *fYearEntry;  // year selector
+  TGColorSelect  *fTableColor; // selector of color
+
+
+  
+  IDList           IDs;           // Widget IDs generator
   
   ClassDef(MainFrame, 0)
 };
@@ -50,21 +93,103 @@ void MainFrame::ChangeStartLabel()
   fStart->SetState(kButtonUp);
 }
 
+void MainFrame::SetGroupEnabled(Bool_t on)
+{
+   fButtonGroup->SetState(on);
+}
+
+void MainFrame::ChangeUpdate()
+{
+  Int_t month = fMonthBox->GetSelected();
+  Int_t year = atoi(fYearEntry->GetNumberEntry()->GetText());
+  Pixel_t pixel = 0;
+  pixel = fTableColor->GetColor();
+
+  std::cout<<"Month: "<<month<<"  Year: " <<year<<"  Pixel: "<<pixel<<std::endl;
+
+  // 同个按钮多次按，响应同时单独在运行
+  int a = 0;
+  while(fCheckb[3]->IsOn())
+    {
+      for (int i = 0; i < 100; ++i)
+	{
+	  a+=i;
+	}
+      gSystem->ProcessEvents();
+    }
+  
+  std::cout<<"@@@ --- @@@"<<std::endl;
+}
+
+
 MainFrame::MainFrame(const TGWindow *p, UInt_t w, UInt_t h)
   : TGMainFrame(p, w, h)// default VerticalFrame
 {
   TGVerticalFrame *fVf = new TGVerticalFrame(this, 10, 10);
   AddFrame(fVf, new TGLayoutHints(kLHintsRight | kLHintsExpandX | kLHintsExpandY));
 
-  
+  //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+  TGHorizontalFrame *fH0 = new TGHorizontalFrame(fVf, 10, 10, kSunkenFrame);
+  fVf->AddFrame(fH0, new TGLayoutHints(kLHintsTop | kLHintsExpandX));
+
+  TGGC *fTextGC;
+  const TGFont *font = gClient->GetFont("-*-times-bold-r-*-*-18-*-*-*-*-*-*-*");
+  if (!font)
+    font = gClient->GetResourcePool()->GetDefaultFont();
+  FontStruct_t labelfont = font->GetFontStruct();
+  GCValues_t   gval;
+  gval.fMask = kGCBackground | kGCFont | kGCForeground;
+  gval.fFont = font->GetFontHandle();
+  gClient->GetColorByName("yellow", gval.fBackground);
+  fTextGC = gClient->GetGC(&gval, kTRUE);
+  ULong_t bcolor, ycolor;
+  gClient->GetColorByName("yellow", ycolor);
+  gClient->GetColorByName("blue", bcolor);
+
+  fLbl1 = new TGLabel(fH0, "OwnFont & Bck/ForgrColor", fTextGC->GetGC(),
+		      labelfont, kChildFrame, bcolor);
+  fH0->AddFrame(fLbl1, new TGLayoutHints(kLHintsNormal, 5, 5, 3, 4));
+  fLbl1->SetTextColor(ycolor);
+
+  fLbl2 = new TGLabel(fH0, "Own Font & ForegroundColor", fTextGC->GetGC(),labelfont);
+  fH0->AddFrame(fLbl2,  new TGLayoutHints(kLHintsCenterX, 5, 5, 3, 4));
+  fLbl2->SetTextColor(ycolor);
+
+  fLbl3 = new TGLabel(fH0, "Normal Label");
+  fH0->AddFrame(fLbl3,  new TGLayoutHints(kLHintsCenterX, 5, 5, 3, 4));
+
+  fLbl4 = new TGLabel(fH0, "Multi-line label, resized\nto 300x80 pixels",
+		      fTextGC->GetGC(), labelfont, kChildFrame, bcolor);
+  fH0->AddFrame(fLbl4, new TGLayoutHints(kLHintsCenterX, 5, 5, 3, 4));
+  fLbl4->SetTextColor(ycolor);
+  fLbl4->ChangeOptions(fLbl4->GetOptions() | kFixedSize);
+  fLbl4->Resize(350, 80);  
+
+  fLbl1->Enable();
+  fLbl2->Enable();
+  fLbl3->Enable();
+  fLbl4->Enable();
+  // fLbl1->Disable();
+  // fLbl2->Disable();
+  // fLbl3->Disable();
+  // fLbl4->Disable();
+
+  if (fLbl1->IsDisabled())
+    {
+      printf("Disabled labels\n");
+    }
+   
+  //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
   TGHorizontalFrame *fH1 = new TGHorizontalFrame(fVf, 10, 10, kSunkenFrame);//, kFixedHeight
   fVf->AddFrame(fH1, new TGLayoutHints(kLHintsTop | kLHintsExpandX));
 
   fStart = new TGTextButton(fH1, "&Start",1/*button id*/);
   fStart->Associate(this);// 继承 widget 的需要调用该函数才能向主窗口发送 Message
   fH1->AddFrame(fStart, new TGLayoutHints(kLHintsTop | kLHintsExpandX,3, 2, 2, 2));
-  fStart->SetToolTipText("Click to toggle the button label (Start/Stop)");
-  fStart->Connect("Clicked()", "MainFrame", this, "ChangeStartLabel()");
+  fStart->SetToolTipText("Click to toggle the button label (Start/Stop)",400);
+  fStart->Connect("Clicked()", "MainFrame", this, "ChangeStartLabel()");// connect signals
   start = kFALSE;
   std::cout<<"start button ID: "<<fStart->WidgetId()<<std::endl;
   
@@ -78,17 +203,110 @@ MainFrame::MainFrame(const TGWindow *p, UInt_t w, UInt_t h)
 
   fExit = new TGTextButton(fH1, "&Exit ","gApplication->Terminate(0)");
   fExit->Associate(this);
+  fExit->ChangeBackground(0x0000ff);
+  // fExit->Resize(300, 20);
+  // fExit->ChangeOptions(fExit->GetOptions() | kFixedSize);
   fH1->AddFrame(fExit, new TGLayoutHints(kLHintsTop | kLHintsExpandX,5,5,2,2));
    
-
+  //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
   
   TGHorizontalFrame *fH2 = new TGHorizontalFrame(fVf, 10, 10, kSunkenFrame);
   fVf->AddFrame(fH2, new TGLayoutHints(kLHintsTop | kLHintsExpandX));
 
+  fCheckb[3] = new TGCheckButton(fH2, new TGHotString("Enable BG"),IDs.GetUnID());
+  fCheckb[3]->SetToolTipText("Enable/Disable the button group");
+  fH2->AddFrame(fCheckb[3], new TGLayoutHints(kLHintsCenterX|kLHintsCenterY, 1, 1, 1, 1));
+  fCheckb[3]->Connect("Toggled(Bool_t)"/*切换状态*/, "MainFrame", this, "SetGroupEnabled(Bool_t)");// connect signals
+  fCheckb[3]->SetOn();
+  
+  fButtonGroup = new TGButtonGroup(fH2, "Button Group");
+  fH2->AddFrame(fButtonGroup, new TGLayoutHints(kLHintsCenterX|kLHintsCenterY, 1, 1, 1, 1));
+  fButtonGroup->SetTitlePos(TGGroupFrame::kCenter);
+  fButtonGroup->SetButton(kTextCenterX);
+  fCheckb[0] = new TGCheckButton(fButtonGroup, new TGHotString("CB 1"),IDs.GetUnID());
+  fCheckb[0]->SetToolTipText("Enable/Disable");
+  fCheckb[1] = new TGCheckButton(fButtonGroup, new TGHotString("CB 2"),IDs.GetUnID());
+  fCheckb[2] = new TGCheckButton(fButtonGroup, new TGHotString("CB 3"),IDs.GetUnID());
+  fRadiob[0] = new TGRadioButton(fButtonGroup, new TGHotString("RB 1"),IDs.GetUnID());
+  fRadiob[1] = new TGRadioButton(fButtonGroup, new TGHotString("RB 2"),IDs.GetUnID());
 
+  
+  fButtonGroup->Show();
+  fButtonGroup->SetState(kTRUE);//是否开启，开启才可以选，不开启是灰色的
+  fButtonGroup->SetRadioButtonExclusive(kTRUE);
 
+  fCheckb[3]->Associate(this);
+  fCheckb[0]->Associate(this);
+  fCheckb[1]->Associate(this);
+  fCheckb[2]->Associate(this);
+  fRadiob[0]->Associate(this);
+  fRadiob[1]->Associate(this);
+
+  fCheckb[0]->SetOn();
+  fRadiob[1]->SetOn();
+
+  //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+  
   TGHorizontalFrame *fH3 = new TGHorizontalFrame(fVf, 10, 10, kSunkenFrame);
   fVf->AddFrame(fH3, new TGLayoutHints(kLHintsTop | kLHintsExpandX));
+
+  TGLabel *dateLabel = new TGLabel(fH3, "Date:");
+  fH3->AddFrame(dateLabel, new TGLayoutHints(kLHintsLeft|kLHintsCenterY,5, 2, 2, 2));
+  
+  TString monthNames[12] = {"January", "February", "March", "April",
+			    "May", "June", "July", "August", "September",
+			    "October", "November", "December"};
+  TDatime today;
+  fMonthBox = new TGComboBox(fH3,-1/*IDs*/);
+  fH3->AddFrame(fMonthBox, new TGLayoutHints(kLHintsLeft, 5, 5, 2, 2));
+  for (int i = 0; i < 12; i++) {
+    fMonthBox->AddEntry(monthNames[i].Data(), i+1);
+  }
+  fMonthBox->Select(today.GetMonth());
+  fMonthBox->Associate(this);
+  
+  fYearEntry = new TGNumberEntry(fH3, today.GetYear(), 5, -1/*IDs*/,
+				 TGNumberFormat::kNESInteger,
+				 TGNumberFormat::kNEAPositive,
+				 TGNumberFormat::kNELLimitMin, 1995);
+  fH3->AddFrame(fYearEntry, new TGLayoutHints(kLHintsLeft, 5, 5, 2, 2));
+  fYearEntry->Associate(this);
+  fMonthBox->Resize(100, fYearEntry->GetHeight());
+
+  
+  TGLabel *tableLabel = new TGLabel(fH3, "Color:");
+  fH3->AddFrame(tableLabel, new TGLayoutHints(kLHintsLeft|kLHintsCenterY,5, 2, 2, 2));
+
+  Pixel_t color;
+  gClient->GetColorByName("yellow", color);
+  fTableColor = new TGColorSelect(fH3, color,-1/*IDs*/);
+  fH3->AddFrame(fTableColor, new TGLayoutHints(kLHintsLeft|kLHintsCenterY,5, 2, 2, 2));  
+  fTableColor->Associate(this);
+
+  // connect signals
+  fMonthBox->Connect("Selected(Int_t)", "MainFrame", this,"ChangeUpdate()");
+  fYearEntry->GetNumberEntry()->Connect("TextChanged(char*)", "MainFrame",this, "ChangeUpdate()");
+  fTableColor->Connect("ColorSelected(Pixel_t)", "MainFrame", this,"ChangeUpdate()");
+  
+  //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+  
+  TGHorizontalFrame *fH4 = new TGHorizontalFrame(fVf, 10, 10, kSunkenFrame);
+  fVf->AddFrame(fH4, new TGLayoutHints(kLHintsTop | kLHintsExpandX));
+
+
+
+
+
+
+  //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+  
+  TGHorizontalFrame *fH5 = new TGHorizontalFrame(fVf, 10, 10, kSunkenFrame);
+  fVf->AddFrame(fH5, new TGLayoutHints(kLHintsTop | kLHintsExpandX));
+
+
+
+
+
 
   
   
@@ -103,6 +321,8 @@ MainFrame::MainFrame(const TGWindow *p, UInt_t w, UInt_t h)
   // Resize(GetDefaultSize());
   Resize(800,600);
   MapWindow();
+
+  Print();
 }
 
 MainFrame::~MainFrame()
