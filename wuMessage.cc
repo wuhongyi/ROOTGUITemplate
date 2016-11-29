@@ -4,9 +4,9 @@
 // Author: Hongyi Wu(吴鸿毅)
 // Email: wuhongyi@qq.com 
 // Created: 日 11月 13 13:26:31 2016 (+0800)
-// Last-Updated: 一 11月 14 17:55:12 2016 (+0800)
+// Last-Updated: 二 11月 29 21:53:36 2016 (+0800)
 //           By: Hongyi Wu(吴鸿毅)
-//     Update #: 72
+//     Update #: 73
 // URL: http://wuhongyi.cn 
 
 #include "TGFrame.h"
@@ -24,7 +24,7 @@
 // TGCompositeFrame ProcessedEvent(Event_t*) ProcessedConfigure(Event_t*)
 // TGFrame ProcessedEvent(Event_t*) ProcessedConfigure(Event_t*)
 // TGMainFrame CloseWindow()
-// TGNumberEntry TextChanged(char*)
+// TGNumberEntry TextChanged(char*)  ValueChanged(Long_t val)  ValueSet(Long_t val)  能不能connect与EAttribute属性的设置有关
 // TGPopupMenu Activated(Int_t)
 // TGSpeedo OdoClicked() LedClicked()
 // TGTextButton Clicked() Pressed() 
