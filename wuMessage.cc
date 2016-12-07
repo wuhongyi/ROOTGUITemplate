@@ -4,9 +4,9 @@
 // Author: Hongyi Wu(吴鸿毅)
 // Email: wuhongyi@qq.com 
 // Created: 日 11月 13 13:26:31 2016 (+0800)
-// Last-Updated: 二 11月 29 21:53:36 2016 (+0800)
+// Last-Updated: 三 12月  7 20:59:40 2016 (+0800)
 //           By: Hongyi Wu(吴鸿毅)
-//     Update #: 73
+//     Update #: 76
 // URL: http://wuhongyi.cn 
 
 #include "TGFrame.h"
@@ -22,11 +22,14 @@
 // TGColorSelect ColorSelected(Pixel_t)
 // TGComboBox Selected(Int_t)
 // TGCompositeFrame ProcessedEvent(Event_t*) ProcessedConfigure(Event_t*)
+// TGFontDialog -> FontSelected(char *font) AlignSelected(Int_t a) ColorSelected(Pixel_t c)
 // TGFrame ProcessedEvent(Event_t*) ProcessedConfigure(Event_t*)
+// TGImageMap -> RegionClicked(Int_t id) DoubleClicked(Int_t id) DoubleClicked() OnMouseOver(Int_t id) OnMouseOut(Int_t id)
 // TGMainFrame CloseWindow()
 // TGNumberEntry TextChanged(char*)  ValueChanged(Long_t val)  ValueSet(Long_t val)  能不能connect与EAttribute属性的设置有关
 // TGPopupMenu Activated(Int_t)
 // TGSpeedo OdoClicked() LedClicked()
+// TGTab -> CloseTab(Int_t id) Removed(Int_t id) Selected(Int_t id)
 // TGTextButton Clicked() Pressed() 
 
 
