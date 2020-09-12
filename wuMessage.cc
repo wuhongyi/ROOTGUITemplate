@@ -4,9 +4,9 @@
 // Author: Hongyi Wu(吴鸿毅)
 // Email: wuhongyi@qq.com 
 // Created: 日 11月 13 13:26:31 2016 (+0800)
-// Last-Updated: 三 12月  7 20:59:40 2016 (+0800)
+// Last-Updated: 日 4月 23 13:44:24 2017 (+0800)
 //           By: Hongyi Wu(吴鸿毅)
-//     Update #: 76
+//     Update #: 82
 // URL: http://wuhongyi.cn 
 
 #include "TGFrame.h"
@@ -72,8 +72,7 @@ private:
   TGComboBox     *fMonthBox;   // month selector
   TGNumberEntry  *fYearEntry;  // year selector
   TGColorSelect  *fTableColor; // selector of color
-
-
+  
   
   IDList           IDs;           // Widget IDs generator
   
@@ -307,11 +306,7 @@ MainFrame::MainFrame(const TGWindow *p, UInt_t w, UInt_t h)
   fVf->AddFrame(fH5, new TGLayoutHints(kLHintsTop | kLHintsExpandX));
 
 
-
-
-
-
-  
+ 
   
   
   // What to clean up in dtor
